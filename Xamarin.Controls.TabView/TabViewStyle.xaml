@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary xmlns="http://xamarin.com/schemas/2014/forms"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    xmlns:control="clr-namespace:Xamarin.Controls.TabView"
+                    x:Class="Xamarin.Controls.TabView.TabViewStyle">
+
+    <Style TargetType="control:TabView">
+        <Setter Property="Padding"
+                Value="0" />
+        <Setter Property="Margin"
+                Value="0" />
+        <Setter Property="ControlTemplate">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Grid RowSpacing="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0"
+                              HeightRequest="{TemplateBinding HeaderHeightRequest}"
+                              HorizontalOptions="Fill"
+                              BackgroundColor="{TemplateBinding HeaderBarBackgroundColor}"
+                              Margin="{TemplateBinding Padding}">
+                            <ScrollView VerticalOptions="Fill"
+                                        HorizontalOptions="Fill"
+                                        VerticalScrollBarVisibility="Never">
+                                <StackLayout HorizontalOptions="Fill"
+                                             VerticalOptions="Fill"
+                                             Orientation="Horizontal"
+                                             x:Name="PART_HeadersContainer"
+                                             Spacing="0" />
+                            </ScrollView>
+                        </Grid>
+
+                        <Grid Grid.Row="1"
+                              VerticalOptions="Fill"
+                              HorizontalOptions="Fill"
+                              BackgroundColor="{TemplateBinding ContentBackgroundColor}"
+                              Margin="{TemplateBinding Padding}"
+                              x:Name="PART_ContentContainer">
+                            <!--<ContentView VerticalOptions="Fill"
+                                         HorizontalOptions="Fill"
+                                         x:Name="PART_ContentContainer" />-->
+                        </Grid>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>
