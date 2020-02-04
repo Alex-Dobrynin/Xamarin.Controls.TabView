@@ -5,19 +5,27 @@
     <Authors>Alex Dobrynin</Authors>
     <Product />
     <Company />
-    <Description>Fully customizable TabVIew</Description>
+    <Description>Fully customizable TabView for Xamarin Forms. ReadMe to be added soon</Description>
     <Copyright>2020 Alex Dobrynin</Copyright>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/Alex-Dobrynin/Xamarin.Controls.TabView</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Alex-Dobrynin/Xamarin.Controls.TabView.git</RepositoryUrl>
-    <PackageTags>TabView Xamarin Xamarin.Fomrs</PackageTags>
-    <PackageReleaseNotes>Initial 1.0.0 release</PackageReleaseNotes>
+    <PackageTags>TabView Xamarin Xamarin.Fomrs TabbedView Tab Tabbed View Tabs Forms Control</PackageTags>
+    <PackageReleaseNotes>Increased version to 1.0.1
+
+fully implemented INotifyCollectionChanged,
+added pissibility to disable tab - it will be invisible,
+implemented content template changed,
+fix related to Binding context change.</PackageReleaseNotes>
     <RepositoryType>Git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="4.4.0.991537" />
+    <PackageReference Include="Xamarin.Forms" Version="4.1.0.778454" />
   </ItemGroup>
 
   <ItemGroup>
