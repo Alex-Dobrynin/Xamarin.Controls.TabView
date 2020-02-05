@@ -73,7 +73,7 @@ namespace Xamarin.Controls.TabView
                 }
                 else
                 {
-                    this.SetBinding(View.BackgroundColorProperty, new TemplateBinding("UnselectedHeaderBackgroundColor"));
+                    this.SetBinding(View.BackgroundColorProperty, new TemplateBinding("HeaderBackgroundColor"));
                     this.Content = _unselectedView;
                 }
             }
@@ -532,6 +532,11 @@ namespace Xamarin.Controls.TabView
             {
                 var tab = sender as TabViewItem;
                 if (!tab.IsEnabled && tab.IsSelected) SelectClosestTab(tab, Tabs.Where(t => t.IsEnabled || t == tab).ToList());
+                else if (tab.IsEnabled && !Tabs.Any(t => t.IsEnabled))
+                {
+                    var index = Tabs.IndexOf(tab);
+                    SelectedTabIndex = index;
+                }
             }
         }
 
@@ -601,16 +606,16 @@ namespace Xamarin.Controls.TabView
                 );
         #endregion
 
-        #region UnselectedHeaderBackgroundColor
-        public Color UnselectedHeaderBackgroundColor
+        #region HeaderBackgroundColor
+        public Color HeaderBackgroundColor
         {
-            get { return (Color)GetValue(UnselectedHeaderBackgroundColorProperty); }
-            set { SetValue(UnselectedHeaderBackgroundColorProperty, value); }
+            get { return (Color)GetValue(HeaderBackgroundColorProperty); }
+            set { SetValue(HeaderBackgroundColorProperty, value); }
         }
 
-        public static readonly BindableProperty UnselectedHeaderBackgroundColorProperty =
+        public static readonly BindableProperty HeaderBackgroundColorProperty =
             BindableProperty.Create(
-                nameof(UnselectedHeaderBackgroundColor),
+                nameof(HeaderBackgroundColor),
                 typeof(Color),
                 typeof(TabView),
                 Color.Transparent
