@@ -24,7 +24,10 @@
                               Margin="{TemplateBinding Padding}">
                             <ScrollView VerticalOptions="Fill"
                                         HorizontalOptions="Fill"
-                                        VerticalScrollBarVisibility="Never">
+                                        Orientation="Horizontal"
+                                        VerticalScrollBarVisibility="Never"
+                                        HorizontalScrollBarVisibility="Never"
+                                        x:Name="PART_HeadersScrollView">
                                 <StackLayout HorizontalOptions="Fill"
                                              VerticalOptions="Fill"
                                              Orientation="Horizontal"

@@ -5,12 +5,13 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 using Xamarin.Forms;
 
 namespace Xamarin.Controls.TabView
 {
-    internal class TabViewHeaderItem : ContentView
+    internal class TabViewHeaderItem : Grid
     {
         private readonly DataTemplate _stringTemplate = new DataTemplate(() =>
         {
@@ -59,7 +60,9 @@ namespace Xamarin.Controls.TabView
 
             if (propertyName == HeaderContentProperty.PropertyName && HeaderContent is View content)
             {
-                this.Content = content;
+                this.Children.Clear();
+                this.Children.Add(content);
+                //this.Content = content;
             }
 
             if (HeaderContent is View) return;
@@ -69,13 +72,16 @@ namespace Xamarin.Controls.TabView
                 if (IsSelected)
                 {
                     this.SetBinding(View.BackgroundColorProperty, new TemplateBinding("SelectedHeaderBackgroundColor"));
-                    this.Content = _selectedView;
+                    //this.Content = _selectedView;
                 }
                 else
                 {
                     this.SetBinding(View.BackgroundColorProperty, new TemplateBinding("HeaderBackgroundColor"));
-                    this.Content = _unselectedView;
+                    //this.Content = _unselectedView;
                 }
+
+                _selectedView.IsVisible = this.IsSelected;
+                _unselectedView.IsVisible = !this.IsSelected;
             }
             else if (propertyName == HeaderContentProperty.PropertyName
                 || propertyName == SelectedContentTemplateProperty.PropertyName
@@ -87,52 +93,33 @@ namespace Xamarin.Controls.TabView
 
         internal void InitContent()
         {
-            var selectedTemplate = SelectedContentTemplate != null
-                                   ? (SelectedContentTemplate is DataTemplateSelector selectorS ? selectorS.SelectTemplate(HeaderContent, null) : SelectedContentTemplate)
-                                   : null;
-
             var unselectedTemplate = ContentTemplate != null
                                      ? (ContentTemplate is DataTemplateSelector selectorU ? selectorU.SelectTemplate(HeaderContent, null) : ContentTemplate)
-                                     : null;
+                                     : _stringTemplate;
+
+            var selectedTemplate = SelectedContentTemplate != null
+                                   ? (SelectedContentTemplate is DataTemplateSelector selectorS ? selectorS.SelectTemplate(HeaderContent, null) : SelectedContentTemplate)
+                                   : unselectedTemplate;
 
             object context = HeaderContent;
             if (context is null)
             {
                 context = "Empty Header";
             }
-            else if (!(context is string))
-            {
-                if (this.IsSelected)
-                {
-                    if (selectedTemplate == null && unselectedTemplate == null) context = context.ToString();
-                }
-                else
-                {
-                    if (unselectedTemplate == null) context = context.ToString();
-                }
-            }
 
-            if (context is string)
-            {
-                selectedTemplate = selectedTemplate ?? (unselectedTemplate ?? _stringTemplate);
-                _selectedView = selectedTemplate.CreateContent() as View;
-                _selectedView.BindingContext = context;
+            _selectedView = selectedTemplate.CreateContent() as View;
+            _selectedView.BindingContext = selectedTemplate == _stringTemplate ? context.ToString() : context;
 
-                unselectedTemplate = unselectedTemplate ?? _stringTemplate;
-                _unselectedView = unselectedTemplate.CreateContent() as View;
-                _unselectedView.BindingContext = context;
-            }
-            else
-            {
-                selectedTemplate = selectedTemplate ?? unselectedTemplate;
-                _selectedView = selectedTemplate.CreateContent() as View;
-                _selectedView.BindingContext = context;
+            _unselectedView = unselectedTemplate.CreateContent() as View;
+            _unselectedView.BindingContext = unselectedTemplate == _stringTemplate ? context.ToString() : context;
 
-                _unselectedView = unselectedTemplate.CreateContent() as View;
-                _unselectedView.BindingContext = context;
-            }
+            _selectedView.IsVisible = this.IsSelected;
+            _unselectedView.IsVisible = !this.IsSelected;
 
-            this.Content = this.IsSelected ? _selectedView : _unselectedView;
+            this.Children.Clear();
+            this.Children.Add(_selectedView);
+            this.Children.Add(_unselectedView);
+            //this.Content = this.IsSelected ? _selectedView : _unselectedView;
         }
 
         #region IsSelected
@@ -269,6 +256,7 @@ namespace Xamarin.Controls.TabView
     {
         private Grid _contentContainer;
         private StackLayout _headersContainer;
+        private ScrollView _headersScroll;
         private TabViewItem _prevSelectedTabItem;
         private bool _useItemsSource;
 
@@ -285,6 +273,7 @@ namespace Xamarin.Controls.TabView
 
             _contentContainer = this.GetTemplateChild("PART_ContentContainer") as Grid;
             _headersContainer = this.GetTemplateChild("PART_HeadersContainer") as StackLayout;
+            _headersScroll = this.GetTemplateChild("PART_HeadersScrollView") as ScrollView;
         }
 
         protected override void OnBindingContextChanged()
@@ -350,10 +339,8 @@ namespace Xamarin.Controls.TabView
                         _contentContainer.Content = null;
                     }*/
                     if (_prevSelectedTabItem != null) _prevSelectedTabItem.IsSelected = false;
-                    return;
                 }
-
-                if (_contentContainer != null)
+                else if (_contentContainer != null)
                 {
                     if (_prevSelectedTabItem != null) _prevSelectedTabItem.IsSelected = false;
                     /*if (_contentContainer.Content is TabViewItem prevTab)
@@ -362,9 +349,14 @@ namespace Xamarin.Controls.TabView
                     }*/
 
                     var newTab = Tabs.ElementAtOrDefault(SelectedTabIndex);
-                    newTab.IsSelected = true;
+                    if (newTab != null)
+                    {
+                        newTab.IsSelected = true;
+                    }
                     //_contentContainer.Content = newTab;
                 }
+
+                SelectedTabChangedCommand?.Execute(SelectedTabChangedCommandParameter);
             }
             else if (propertyName == ContentTemplateProperty.PropertyName && _useItemsSource)
             {
@@ -376,7 +368,7 @@ namespace Xamarin.Controls.TabView
             }
         }
 
-        private void InitItems(IEnumerable source)
+        private void InitItems(IEnumerable source, bool useIndex = false, int index = 0)
         {
             if (source == null) return;
 
@@ -388,7 +380,11 @@ namespace Xamarin.Controls.TabView
                 tabItem.BindingContext = item;
                 tabItem.Header = item;
 
-                Tabs.Add(tabItem);
+                if (useIndex)
+                {
+                    Tabs.Insert(index, tabItem);
+                }
+                else Tabs.Add(tabItem);
             }
         }
 
@@ -422,7 +418,7 @@ namespace Xamarin.Controls.TabView
             {
                 case NotifyCollectionChangedAction.Add:
                     {
-                        InitItems(e.NewItems);
+                        InitItems(e.NewItems, true, e.NewStartingIndex);
                     }
                     break;
                 case NotifyCollectionChangedAction.Move:
@@ -432,9 +428,29 @@ namespace Xamarin.Controls.TabView
                     break;
                 case NotifyCollectionChangedAction.Remove:
                     {
-                        var tab = Tabs.ElementAt(e.OldStartingIndex);
-                        SelectClosestTab(tab, Tabs.ToList());
-                        Tabs.Remove(tab);
+                        if (Tabs.Count == 1)
+                        {
+                            Tabs.Clear();
+                            return;
+                        }
+
+                        if (e.OldStartingIndex < SelectedTabIndex)
+                        {
+                            Tabs.RemoveAt(e.OldStartingIndex);
+                            SelectedTabIndex--;
+                        }
+                        else if (e.OldStartingIndex == SelectedTabIndex && e.OldStartingIndex == Tabs.Count - 1)
+                        {
+                            SelectedTabIndex--;
+                            Tabs.RemoveAt(e.OldStartingIndex);
+                        }
+                        else if (e.OldStartingIndex == SelectedTabIndex && e.OldStartingIndex != Tabs.Count - 1)
+                        {
+                            Tabs.RemoveAt(e.OldStartingIndex);
+                            var tab = Tabs.ElementAtOrDefault(SelectedTabIndex);
+                            tab.IsSelected = true;
+                        }
+                        else Tabs.RemoveAt(e.OldStartingIndex);
                     }
                     break;
                 case NotifyCollectionChangedAction.Replace:
@@ -477,11 +493,26 @@ namespace Xamarin.Controls.TabView
                                 tabItem.TabViewHeaderItem.InitContent();
                             }
 
-                            if (_headersContainer != null) _headersContainer.Children.Add(tabItem.TabViewHeaderItem);
-                            if (_contentContainer != null) _contentContainer.Children.Add(tabItem);
+                            if (_headersContainer != null) _headersContainer.Children.Insert(e.NewStartingIndex, tabItem.TabViewHeaderItem);
+                            if (_contentContainer != null) _contentContainer.Children.Insert(e.NewStartingIndex, tabItem);
                         }
 
                         if (SelectedTabIndex == -1) SelectedTabIndex = 0;
+                        else
+                        {
+                            if (!Tabs.Any(t => t.IsSelected))
+                            {
+                                var tab = Tabs.ElementAtOrDefault(SelectedTabIndex);
+                                if (tab.IsEnabled) tab.IsSelected = true;
+                            }
+                            else
+                            {
+                                if (e.NewStartingIndex <= SelectedTabIndex)
+                                {
+                                    SelectedTabIndex++;
+                                }
+                            }
+                        }
                     }
                     break;
                 case NotifyCollectionChangedAction.Move:
@@ -526,6 +557,10 @@ namespace Xamarin.Controls.TabView
                 if (sender is TabViewItem tab && tab.IsSelected)
                 {
                     SelectedTabIndex = Tabs.IndexOf(tab);
+                    if (_headersScroll != null && ScrollToSelectedTab)
+                    {
+                        _headersScroll.ScrollToAsync(tab.TabViewHeaderItem.X - (_headersScroll.Width - tab.TabViewHeaderItem.Width) / 2, 0, true);
+                    }
                 }
             }
             else if (e.PropertyName == TabViewItem.IsEnabledProperty.PropertyName)
@@ -557,6 +592,22 @@ namespace Xamarin.Controls.TabView
                 SelectedTabIndex = Tabs.IndexOf(tabToSelect);
             }
         }
+
+        #region ScrollToSelectedTab
+        public bool ScrollToSelectedTab
+        {
+            get { return (bool)GetValue(ScrollToSelectedTabProperty); }
+            set { SetValue(ScrollToSelectedTabProperty, value); }
+        }
+
+        public static readonly BindableProperty ScrollToSelectedTabProperty =
+            BindableProperty.Create(
+                nameof(ScrollToSelectedTab),
+                typeof(bool),
+                typeof(TabView),
+                true
+                );
+        #endregion
 
         #region ContentBackgroundColor
         public Color ContentBackgroundColor
@@ -773,6 +824,36 @@ namespace Xamarin.Controls.TabView
             BindableProperty.Create(
                 nameof(ItemsSource),
                 typeof(IEnumerable),
+                typeof(TabView)
+                );
+        #endregion
+
+        #region SelectedTabChangedCommand
+        public ICommand SelectedTabChangedCommand
+        {
+            get { return (ICommand)GetValue(SelectedTabChangedCommandProperty); }
+            set { SetValue(SelectedTabChangedCommandProperty, value); }
+        }
+
+        public static readonly BindableProperty SelectedTabChangedCommandProperty =
+            BindableProperty.Create(
+                nameof(SelectedTabChangedCommand),
+                typeof(ICommand),
+                typeof(TabView)
+                );
+        #endregion
+
+        #region SelectedTabChangedCommandParameter
+        public object SelectedTabChangedCommandParameter
+        {
+            get { return (object)GetValue(SelectedTabChangedCommandParameterProperty); }
+            set { SetValue(SelectedTabChangedCommandParameterProperty, value); }
+        }
+
+        public static readonly BindableProperty SelectedTabChangedCommandParameterProperty =
+            BindableProperty.Create(
+                nameof(SelectedTabChangedCommandParameter),
+                typeof(object),
                 typeof(TabView)
                 );
         #endregion
