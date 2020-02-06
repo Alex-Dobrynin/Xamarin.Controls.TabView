@@ -10,18 +10,17 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/Alex-Dobrynin/Xamarin.Controls.TabView</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Alex-Dobrynin/Xamarin.Controls.TabView.git</RepositoryUrl>
-    <PackageTags>TabView Xamarin Xamarin.Fomrs TabbedView Tab Tabbed View Tabs Forms Control</PackageTags>
-    <PackageReleaseNotes>Increased version to 1.0.1
+    <PackageTags>TabView Xamarin Xamarin.Forms TabbedView Tab Tabbed View Tabs Forms Control Xamarin.Forms.TabView</PackageTags>
+    <PackageReleaseNotes>Increased version to 1.0.3
 
-fully implemented INotifyCollectionChanged,
-added pissibility to disable tab - it will be invisible,
-implemented content template changed,
-fix related to Binding context change.</PackageReleaseNotes>
+added header bar alignment,
+added possibility to change header items layout,
+small fixes</PackageReleaseNotes>
     <RepositoryType>Git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
-    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.3.0</AssemblyVersion>
+    <FileVersion>1.0.3.0</FileVersion>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>

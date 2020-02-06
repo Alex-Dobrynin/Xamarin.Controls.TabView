@@ -1,0 +1,192 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tabview="clr-namespace:Xamarin.Controls.TabView;assembly=Xamarin.Controls.TabView"
+             x:Class="Sample.TabVIew.Views.MainPage"
+             Title="{Binding Title}">
+
+    <Grid ColumnSpacing="0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="3" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <BoxView VerticalOptions="Fill"
+                 HorizontalOptions="Fill"
+                 Color="Gray"
+                 Grid.Column="1" />
+
+        <!--using tabs from markup-->
+        <tabview:TabView SelectedHeaderBackgroundColor="Transparent"
+                         HeaderBarAlignment="Bottom">
+            <tabview:TabView.HeaderTemplate>
+                <DataTemplate>
+                    <Grid Padding="20,0">
+                        <BoxView Color="DarkMagenta"
+                                 HeightRequest="5"
+                                 VerticalOptions="Start"
+                                 HorizontalOptions="Fill" />
+                        <Label Text="{Binding .}"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Center" />
+                    </Grid>
+                </DataTemplate>
+            </tabview:TabView.HeaderTemplate>
+
+            <tabview:TabView.SelectedHeaderTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Label Text="{Binding .}"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Center"
+                               Margin="20,0" />
+                        <BoxView Color="DarkCyan"
+                                 HeightRequest="3"
+                                 VerticalOptions="End"
+                                 HorizontalOptions="Fill" />
+                    </Grid>
+                </DataTemplate>
+            </tabview:TabView.SelectedHeaderTemplate>
+
+            <tabview:TabViewItem Header="First Tab"
+                                 IsEnabled="False">
+                <Grid BackgroundColor="Purple"
+                      VerticalOptions="Center"
+                      HorizontalOptions="Start">
+                    <Label Text="Some content for First Tab"
+                           VerticalOptions="Center"
+                           HorizontalOptions="Center"
+                           TextColor="White" />
+                </Grid>
+            </tabview:TabViewItem>
+
+            <tabview:TabViewItem x:Name="secondTab">
+                <tabview:TabViewItem.Header>
+                    <StackLayout Spacing="0"
+                                 Orientation="Horizontal">
+                        <Label Text="Second Tab"
+                               VerticalOptions="Center"
+                               Margin="10">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label"
+                                             Binding="{Binding IsSelected, Source={x:Reference secondTab}}"
+                                             Value="False">
+                                    <Setter Property="TextColor"
+                                            Value="Green" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label"
+                                             Binding="{Binding IsSelected, Source={x:Reference secondTab}}"
+                                             Value="False">
+                                    <Setter Property="TextColor"
+                                            Value="Red" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                        <BoxView WidthRequest="20"
+                                 HeightRequest="20"
+                                 Color="Orange"
+                                 Margin="10"
+                                 VerticalOptions="Center" />
+                    </StackLayout>
+                </tabview:TabViewItem.Header>
+
+                <Grid BackgroundColor="Aqua">
+                    <Label Text="Some content for Second Tab"
+                           VerticalOptions="Center"
+                           HorizontalOptions="Center" />
+                </Grid>
+            </tabview:TabViewItem>
+
+            <tabview:TabViewItem Header="Third Tab">
+                <Grid BackgroundColor="Black">
+                    <Label Text="Some content for Third Tab"
+                           VerticalOptions="Center"
+                           HorizontalOptions="Center"
+                           TextColor="White" />
+                </Grid>
+            </tabview:TabViewItem>
+        </tabview:TabView>
+
+
+        <!--using tabs from itemssource-->
+        <!--<tabview:TabView Grid.Column="2">
+            <tabview:TabView.ControlTemplate>
+                <ControlTemplate>
+                    <Grid RowSpacing="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid"
+                                         Binding="{TemplateBinding HeaderBarAlignment}"
+                                         Value="Bottom">
+                                <Setter Property="Rotation"
+                                        Value="180" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Grid"
+                                         Binding="{TemplateBinding HeaderBarAlignment}"
+                                         Value="Top">
+                                <Setter Property="Rotation"
+                                        Value="0" />
+                            </DataTrigger>
+                        </Grid.Triggers>
+                        <ScrollView VerticalOptions="Fill"
+                                    Orientation="Horizontal"
+                                    VerticalScrollBarVisibility="Never"
+                                    HorizontalScrollBarVisibility="Never"
+                                    Grid.Row="0"
+                                    HeightRequest="{TemplateBinding HeaderHeightRequest}"
+                                    HorizontalOptions="Fill"
+                                    BackgroundColor="{TemplateBinding HeaderBarBackgroundColor}"
+                                    Margin="{TemplateBinding Padding}"
+                                    x:Name="PART_HeadersScrollView">
+                            <ScrollView.Triggers>
+                                <DataTrigger TargetType="ScrollView"
+                                             Binding="{TemplateBinding HeaderBarAlignment}"
+                                             Value="Bottom">
+                                    <Setter Property="Rotation"
+                                            Value="180" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="ScrollView"
+                                             Binding="{TemplateBinding HeaderBarAlignment}"
+                                             Value="Top">
+                                    <Setter Property="Rotation"
+                                            Value="0" />
+                                </DataTrigger>
+                            </ScrollView.Triggers>
+                            <FlexLayout HorizontalOptions="Fill"
+                                        VerticalOptions="Fill"
+                                        JustifyContent="SpaceBetween"
+                                        x:Name="PART_HeadersContainer"
+                                        Wrap="NoWrap" />
+                        </ScrollView>
+
+                        <Grid Grid.Row="1"
+                              VerticalOptions="Fill"
+                              HorizontalOptions="Fill"
+                              BackgroundColor="{TemplateBinding ContentBackgroundColor}"
+                              Margin="{TemplateBinding Padding}"
+                              x:Name="PART_ContentContainer">
+                            <Grid.Triggers>
+                                <DataTrigger TargetType="Grid"
+                                             Binding="{TemplateBinding HeaderBarAlignment}"
+                                             Value="Bottom">
+                                    <Setter Property="Rotation"
+                                            Value="180" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Grid"
+                                             Binding="{TemplateBinding HeaderBarAlignment}"
+                                             Value="Top">
+                                    <Setter Property="Rotation"
+                                            Value="0" />
+                                </DataTrigger>
+                            </Grid.Triggers>
+                        </Grid>
+                    </Grid>
+                </ControlTemplate>
+            </tabview:TabView.ControlTemplate>
+        </tabview:TabView>-->
+    </Grid>
+</ContentPage>

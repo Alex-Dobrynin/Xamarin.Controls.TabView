@@ -11,251 +11,11 @@ using Xamarin.Forms;
 
 namespace Xamarin.Controls.TabView
 {
-    internal class TabViewHeaderItem : Grid
-    {
-        private readonly DataTemplate _stringTemplate = new DataTemplate(() =>
-        {
-            var lbl = new Label()
-            {
-                VerticalOptions = LayoutOptions.Center,
-                HorizontalOptions = LayoutOptions.Center,
-                VerticalTextAlignment = TextAlignment.Center,
-                HorizontalTextAlignment = TextAlignment.Center
-            };
-            lbl.SetBinding(Label.TextProperty, ".");
-            lbl.SetBinding(Label.TextColorProperty, new TemplateBinding("HeaderTextColor"));
-            lbl.SetBinding(Label.FontFamilyProperty, new TemplateBinding("HeaderFontFamily"));
-            lbl.SetBinding(Label.FontSizeProperty, new TemplateBinding("HeaderFontSize"));
-            lbl.SetBinding(Label.FontAttributesProperty, new TemplateBinding("HeaderFontAttributes"));
-            return new ContentView()
-            {
-                Content = lbl,
-                VerticalOptions = LayoutOptions.Fill,
-                HorizontalOptions = LayoutOptions.Fill,
-                Padding = new Thickness(20, 0)
-            };
-        });
-
-        private View _selectedView;
-        private View _unselectedView;
-
-        public TabViewHeaderItem()
-        {
-            var tap = new TapGestureRecognizer();
-            tap.Tapped += Tap_Tapped;
-            this.GestureRecognizers.Add(tap);
-
-            this.SetBinding(SelectedContentTemplateProperty, new TemplateBinding("SelectedHeaderTemplate"));
-            this.SetBinding(ContentTemplateProperty, new TemplateBinding("HeaderTemplate"));
-        }
-
-        private void Tap_Tapped(object sender, System.EventArgs e)
-        {
-            if (!this.IsSelected) this.IsSelected = true;
-        }
-
-        protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            base.OnPropertyChanged(propertyName);
-
-            if (propertyName == HeaderContentProperty.PropertyName && HeaderContent is View content)
-            {
-                this.Children.Clear();
-                this.Children.Add(content);
-                //this.Content = content;
-            }
-
-            if (HeaderContent is View) return;
-
-            else if (propertyName == IsSelectedProperty.PropertyName)
-            {
-                if (IsSelected)
-                {
-                    this.SetBinding(View.BackgroundColorProperty, new TemplateBinding("SelectedHeaderBackgroundColor"));
-                    //this.Content = _selectedView;
-                }
-                else
-                {
-                    this.SetBinding(View.BackgroundColorProperty, new TemplateBinding("HeaderBackgroundColor"));
-                    //this.Content = _unselectedView;
-                }
-
-                _selectedView.IsVisible = this.IsSelected;
-                _unselectedView.IsVisible = !this.IsSelected;
-            }
-            else if (propertyName == HeaderContentProperty.PropertyName
-                || propertyName == SelectedContentTemplateProperty.PropertyName
-                || propertyName == ContentTemplateProperty.PropertyName)
-            {
-                InitContent();
-            }
-        }
-
-        internal void InitContent()
-        {
-            var unselectedTemplate = ContentTemplate != null
-                                     ? (ContentTemplate is DataTemplateSelector selectorU ? selectorU.SelectTemplate(HeaderContent, null) : ContentTemplate)
-                                     : _stringTemplate;
-
-            var selectedTemplate = SelectedContentTemplate != null
-                                   ? (SelectedContentTemplate is DataTemplateSelector selectorS ? selectorS.SelectTemplate(HeaderContent, null) : SelectedContentTemplate)
-                                   : unselectedTemplate;
-
-            object context = HeaderContent;
-            if (context is null)
-            {
-                context = "Empty Header";
-            }
-
-            _selectedView = selectedTemplate.CreateContent() as View;
-            _selectedView.BindingContext = selectedTemplate == _stringTemplate ? context.ToString() : context;
-
-            _unselectedView = unselectedTemplate.CreateContent() as View;
-            _unselectedView.BindingContext = unselectedTemplate == _stringTemplate ? context.ToString() : context;
-
-            _selectedView.IsVisible = this.IsSelected;
-            _unselectedView.IsVisible = !this.IsSelected;
-
-            this.Children.Clear();
-            this.Children.Add(_selectedView);
-            this.Children.Add(_unselectedView);
-            //this.Content = this.IsSelected ? _selectedView : _unselectedView;
-        }
-
-        #region IsSelected
-        internal bool IsSelected
-        {
-            get { return (bool)GetValue(IsSelectedProperty); }
-            set { SetValue(IsSelectedProperty, value); }
-        }
-
-        internal static readonly BindableProperty IsSelectedProperty =
-            BindableProperty.Create(
-                nameof(IsSelected),
-                typeof(bool),
-                typeof(TabViewHeaderItem)
-                );
-        #endregion
-
-        #region HeaderContent
-        internal object HeaderContent
-        {
-            get { return (object)GetValue(HeaderContentProperty); }
-            set { SetValue(HeaderContentProperty, value); }
-        }
-
-        internal static readonly BindableProperty HeaderContentProperty =
-            BindableProperty.Create(
-                nameof(HeaderContent),
-                typeof(object),
-                typeof(TabViewHeaderItem)
-                );
-        #endregion
-
-        #region SelectedContentTemplate
-        internal DataTemplate SelectedContentTemplate
-        {
-            get { return (DataTemplate)GetValue(SelectedContentTemplateProperty); }
-            set { SetValue(SelectedContentTemplateProperty, value); }
-        }
-
-        internal static readonly BindableProperty SelectedContentTemplateProperty =
-            BindableProperty.Create(
-                nameof(SelectedContentTemplate),
-                typeof(DataTemplate),
-                typeof(TabViewHeaderItem)
-                );
-        #endregion
-
-        #region ContentTemplate
-        internal DataTemplate ContentTemplate
-        {
-            get { return (DataTemplate)GetValue(ContentTemplateProperty); }
-            set { SetValue(ContentTemplateProperty, value); }
-        }
-
-        internal static readonly BindableProperty ContentTemplateProperty =
-            BindableProperty.Create(
-                nameof(ContentTemplate),
-                typeof(DataTemplate),
-                typeof(TabViewHeaderItem)
-                );
-        #endregion
-    }
-
-    public class TabViewItem : ContentView
-    {
-        internal TabViewHeaderItem TabViewHeaderItem { get; set; } = new TabViewHeaderItem();
-
-        public TabViewItem()
-        {
-            TabViewHeaderItem.PropertyChanged += TabViewHeaderItem_PropertyChanged;
-            IsVisible = false;
-        }
-
-        private void TabViewHeaderItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == TabViewHeaderItem.IsSelectedProperty.PropertyName)
-            {
-                this.IsSelected = TabViewHeaderItem.IsSelected;
-                this.IsVisible = this.IsSelected;
-            }
-        }
-
-        protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            base.OnPropertyChanged(propertyName);
-
-            if (propertyName == IsSelectedProperty.PropertyName)
-            {
-                TabViewHeaderItem.IsSelected = IsSelected;
-            }
-            else if (propertyName == HeaderProperty.PropertyName)
-            {
-                TabViewHeaderItem.HeaderContent = Header;
-            }
-            else if (propertyName == IsEnabledProperty.PropertyName)
-            {
-                TabViewHeaderItem.IsVisible = this.IsEnabled;
-            }
-        }
-
-        #region IsSelected
-        public bool IsSelected
-        {
-            get { return (bool)GetValue(IsSelectedProperty); }
-            internal set { SetValue(IsSelectedProperty, value); }
-        }
-
-        public static readonly BindableProperty IsSelectedProperty =
-            BindableProperty.Create(
-                nameof(IsSelected),
-                typeof(bool),
-                typeof(TabViewItem)
-                );
-        #endregion
-
-        #region Header
-        public object Header
-        {
-            get { return (object)GetValue(HeaderProperty); }
-            set { SetValue(HeaderProperty, value); }
-        }
-
-        public static readonly BindableProperty HeaderProperty =
-            BindableProperty.Create(
-                nameof(Header),
-                typeof(object),
-                typeof(TabViewItem)
-                );
-        #endregion
-    }
-
     [ContentProperty("Tabs")]
     public class TabView : ContentView
     {
         private Grid _contentContainer;
-        private StackLayout _headersContainer;
+        private Layout<View> _headersContainer;
         private ScrollView _headersScroll;
         private TabViewItem _prevSelectedTabItem;
         private bool _useItemsSource;
@@ -272,7 +32,7 @@ namespace Xamarin.Controls.TabView
             base.OnApplyTemplate();
 
             _contentContainer = this.GetTemplateChild("PART_ContentContainer") as Grid;
-            _headersContainer = this.GetTemplateChild("PART_HeadersContainer") as StackLayout;
+            _headersContainer = this.GetTemplateChild("PART_HeadersContainer") as Layout<View>;
             _headersScroll = this.GetTemplateChild("PART_HeadersScrollView") as ScrollView;
         }
 
@@ -307,10 +67,7 @@ namespace Xamarin.Controls.TabView
             else if (propertyName == SelectedTabIndexProperty.PropertyName)
             {
                 if (SelectedTabIndex == -1) _prevSelectedTabItem = null;
-                else
-                {
-                    _prevSelectedTabItem = Tabs.ElementAtOrDefault(SelectedTabIndex);
-                }
+                else _prevSelectedTabItem = Tabs.ElementAtOrDefault(SelectedTabIndex);
             }
         }
 
@@ -318,42 +75,26 @@ namespace Xamarin.Controls.TabView
         {
             base.OnPropertyChanged(propertyName);
 
-            if (propertyName == ItemsSourceProperty.PropertyName)
+            if (propertyName == ItemsSourceProperty.PropertyName && ItemsSource != null)
             {
-                if (ItemsSource != null)
-                {
-                    if (ItemsSource is INotifyCollectionChanged itemsSource) itemsSource.CollectionChanged += ItemsSource_CollectionChanged;
+                if (ItemsSource is INotifyCollectionChanged itemsSource) itemsSource.CollectionChanged += ItemsSource_CollectionChanged;
 
-                    _useItemsSource = true;
+                _useItemsSource = true;
 
-                    InitItems(ItemsSource);
-                }
+                InitItems(ItemsSource);
             }
             else if (propertyName == SelectedTabIndexProperty.PropertyName)
             {
                 if (SelectedTabIndex == -1)
                 {
-                    /*if (_contentContainer != null && _contentContainer.Content is TabViewItem tab)
-                    {
-                        tab.IsSelected = false;
-                        _contentContainer.Content = null;
-                    }*/
                     if (_prevSelectedTabItem != null) _prevSelectedTabItem.IsSelected = false;
                 }
                 else if (_contentContainer != null)
                 {
                     if (_prevSelectedTabItem != null) _prevSelectedTabItem.IsSelected = false;
-                    /*if (_contentContainer.Content is TabViewItem prevTab)
-                    {
-                        prevTab.IsSelected = false;
-                    }*/
 
                     var newTab = Tabs.ElementAtOrDefault(SelectedTabIndex);
-                    if (newTab != null)
-                    {
-                        newTab.IsSelected = true;
-                    }
-                    //_contentContainer.Content = newTab;
+                    if (newTab != null) newTab.IsSelected = true;
                 }
 
                 SelectedTabChangedCommand?.Execute(SelectedTabChangedCommandParameter);
@@ -380,10 +121,7 @@ namespace Xamarin.Controls.TabView
                 tabItem.BindingContext = item;
                 tabItem.Header = item;
 
-                if (useIndex)
-                {
-                    Tabs.Insert(index, tabItem);
-                }
+                if (useIndex) Tabs.Insert(index, tabItem);
                 else Tabs.Add(tabItem);
             }
         }
@@ -393,10 +131,7 @@ namespace Xamarin.Controls.TabView
             if (ContentTemplate != null)
             {
                 var template = ContentTemplate;
-                if (ContentTemplate is DataTemplateSelector selector)
-                {
-                    template = selector.SelectTemplate(item, this);
-                }
+                if (ContentTemplate is DataTemplateSelector selector) template = selector.SelectTemplate(item, this);
 
                 var tabContent = template.CreateContent() as View;
                 tabContent.BindingContext = item;
@@ -505,13 +240,7 @@ namespace Xamarin.Controls.TabView
                                 var tab = Tabs.ElementAtOrDefault(SelectedTabIndex);
                                 if (tab.IsEnabled) tab.IsSelected = true;
                             }
-                            else
-                            {
-                                if (e.NewStartingIndex <= SelectedTabIndex)
-                                {
-                                    SelectedTabIndex++;
-                                }
-                            }
+                            else if (e.NewStartingIndex <= SelectedTabIndex) SelectedTabIndex++;
                         }
                     }
                     break;
@@ -552,20 +281,23 @@ namespace Xamarin.Controls.TabView
 
         private void TabItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == TabViewItem.IsSelectedProperty.PropertyName)
+            var tab = sender as TabViewItem;
+
+            if (e.PropertyName == TabViewItem.IsSelectedProperty.PropertyName && tab.IsSelected)
             {
-                if (sender is TabViewItem tab && tab.IsSelected)
+                SelectedTabIndex = Tabs.IndexOf(tab);
+                if (_headersScroll != null && ScrollToSelectedTab && _headersContainer.Width > _headersScroll.Width)
                 {
-                    SelectedTabIndex = Tabs.IndexOf(tab);
-                    if (_headersScroll != null && ScrollToSelectedTab)
-                    {
-                        _headersScroll.ScrollToAsync(tab.TabViewHeaderItem.X - (_headersScroll.Width - tab.TabViewHeaderItem.Width) / 2, 0, true);
-                    }
+                    var max = _headersContainer.Width - _headersScroll.Width;
+                    var scrollTo = tab.TabViewHeaderItem.X - (_headersScroll.Width - tab.TabViewHeaderItem.Width) / 2.0;
+                    if (scrollTo < 0) scrollTo = 0;
+                    else if (scrollTo > max) scrollTo = max;
+
+                    _headersScroll.ScrollToAsync(scrollTo, 0, true);
                 }
             }
             else if (e.PropertyName == TabViewItem.IsEnabledProperty.PropertyName)
             {
-                var tab = sender as TabViewItem;
                 if (!tab.IsEnabled && tab.IsSelected) SelectClosestTab(tab, Tabs.Where(t => t.IsEnabled || t == tab).ToList());
                 else if (tab.IsEnabled && !Tabs.Any(t => t.IsEnabled))
                 {
@@ -855,6 +587,22 @@ namespace Xamarin.Controls.TabView
                 nameof(SelectedTabChangedCommandParameter),
                 typeof(object),
                 typeof(TabView)
+                );
+        #endregion
+
+        #region HeaderBarAlignment
+        public Alignment HeaderBarAlignment
+        {
+            get { return (Alignment)GetValue(HeaderBarAlignmentProperty); }
+            set { SetValue(HeaderBarAlignmentProperty, value); }
+        }
+
+        public static readonly BindableProperty HeaderBarAlignmentProperty =
+            BindableProperty.Create(
+                nameof(HeaderBarAlignment),
+                typeof(Alignment),
+                typeof(TabView),
+                Alignment.Top
                 );
         #endregion
     }
