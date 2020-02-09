@@ -39,6 +39,7 @@ namespace Xamarin.Controls.TabView
             else if (propertyName == IsEnabledProperty.PropertyName)
             {
                 TabViewHeaderItem.IsVisible = this.IsEnabled;
+                if (!this.IsEnabled && this.IsSelected) this.IsSelected = false;
             }
         }
 

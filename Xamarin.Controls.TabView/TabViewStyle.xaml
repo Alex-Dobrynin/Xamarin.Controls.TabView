@@ -55,11 +55,13 @@
                                             Value="0" />
                                 </DataTrigger>
                             </ScrollView.Triggers>
-                            <StackLayout HorizontalOptions="Fill"
+                            <control:ItemsPresenter HorizontalOptions="Fill"
+                                                    VerticalOptions="Fill" />
+                            <!--<StackLayout HorizontalOptions="Fill"
                                          VerticalOptions="Fill"
                                          Orientation="Horizontal"
                                          x:Name="PART_HeadersContainer"
-                                         Spacing="0" />
+                                         Spacing="0" />-->
                         </ScrollView>
 
                         <Grid Grid.Row="1"

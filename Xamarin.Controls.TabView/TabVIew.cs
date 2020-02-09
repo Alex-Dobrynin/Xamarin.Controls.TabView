@@ -15,10 +15,18 @@ namespace Xamarin.Controls.TabView
     public class TabView : ContentView
     {
         private Grid _contentContainer;
-        private Layout<View> _headersContainer;
         private ScrollView _headersScroll;
         private TabViewItem _prevSelectedTabItem;
         private bool _useItemsSource;
+        private Layout<View> _headersContainer;
+
+        private Layout<View> _stackItemsLayout => new StackLayout()
+        {
+            VerticalOptions = LayoutOptions.Fill,
+            HorizontalOptions = LayoutOptions.Fill,
+            Spacing = 0,
+            Orientation = StackOrientation.Horizontal
+        };
 
         public TabView()
         {
@@ -32,8 +40,31 @@ namespace Xamarin.Controls.TabView
             base.OnApplyTemplate();
 
             _contentContainer = this.GetTemplateChild("PART_ContentContainer") as Grid;
-            _headersContainer = this.GetTemplateChild("PART_HeadersContainer") as Layout<View>;
+            //_headersContainer = this.GetTemplateChild("PART_HeadersContainer") as Layout<View>;
             _headersScroll = this.GetTemplateChild("PART_HeadersScrollView") as ScrollView;
+
+            InitHeaderBarLayout();
+        }
+
+        private void InitHeaderBarLayout()
+        {
+            if (_headersScroll == null || !(_headersScroll.Content is ItemsPresenter)) return;
+
+            var newLayout = HeaderItemsLayout ?? _stackItemsLayout;
+
+            if (_headersContainer != null)
+            {
+                foreach (var item in _headersContainer.Children)
+                {
+                    newLayout.Children.Add(item);
+                }
+
+                _headersContainer.Children.Clear();
+            }
+
+            _headersContainer = newLayout;
+
+            (_headersScroll.Content as ItemsPresenter).Content = _headersContainer;
         }
 
         protected override void OnBindingContextChanged()
@@ -106,6 +137,10 @@ namespace Xamarin.Controls.TabView
                     var index = Tabs.IndexOf(tab);
                     InitContentTemplate(tab.BindingContext, tab);
                 }
+            }
+            else if(propertyName == HeaderItemsLayoutProperty.PropertyName)
+            {
+                InitHeaderBarLayout();
             }
         }
 
@@ -232,16 +267,7 @@ namespace Xamarin.Controls.TabView
                             if (_contentContainer != null) _contentContainer.Children.Insert(e.NewStartingIndex, tabItem);
                         }
 
-                        if (SelectedTabIndex == -1) SelectedTabIndex = 0;
-                        else
-                        {
-                            if (!Tabs.Any(t => t.IsSelected))
-                            {
-                                var tab = Tabs.ElementAtOrDefault(SelectedTabIndex);
-                                if (tab.IsEnabled) tab.IsSelected = true;
-                            }
-                            else if (e.NewStartingIndex <= SelectedTabIndex) SelectedTabIndex++;
-                        }
+                        InitialTabSelect(e);
                     }
                     break;
                 case NotifyCollectionChangedAction.Move:
@@ -279,22 +305,53 @@ namespace Xamarin.Controls.TabView
             }
         }
 
+        private void InitialTabSelect(NotifyCollectionChangedEventArgs e)
+        {
+            if (SelectedTabIndex == -1)
+            {
+                if (Tabs.Any(t => t.IsSelected))
+                {
+                    SelectedTabIndex = Tabs.IndexOf(Tabs.FirstOrDefault(t => t.IsSelected));
+                }
+                else
+                {
+                    var tab = Tabs.First();
+                    if (!tab.IsEnabled) SelectClosestTab(tab, Tabs.Where(t => t.IsEnabled || t == tab).ToList());
+                    else SelectedTabIndex = 0;
+                }
+            }
+            else
+            {
+                if (!Tabs.Any(t => t.IsSelected))
+                {
+                    var tab = Tabs.ElementAtOrDefault(SelectedTabIndex);
+                    if (!tab.IsEnabled) SelectClosestTab(tab, Tabs.Where(t => t.IsEnabled || t == tab).ToList());
+                    else tab.IsSelected = true;
+                }
+                else if (e.NewStartingIndex <= SelectedTabIndex) SelectedTabIndex++;
+            }
+        }
+
         private void TabItem_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             var tab = sender as TabViewItem;
 
             if (e.PropertyName == TabViewItem.IsSelectedProperty.PropertyName && tab.IsSelected)
             {
-                SelectedTabIndex = Tabs.IndexOf(tab);
-                if (_headersScroll != null && ScrollToSelectedTab && _headersContainer.Width > _headersScroll.Width)
+                if (tab.IsEnabled)
                 {
-                    var max = _headersContainer.Width - _headersScroll.Width;
-                    var scrollTo = tab.TabViewHeaderItem.X - (_headersScroll.Width - tab.TabViewHeaderItem.Width) / 2.0;
-                    if (scrollTo < 0) scrollTo = 0;
-                    else if (scrollTo > max) scrollTo = max;
+                    SelectedTabIndex = Tabs.IndexOf(tab);
+                    if (_headersScroll != null && ScrollToSelectedTab && _headersContainer.Width > _headersScroll.Width)
+                    {
+                        var max = _headersContainer.Width - _headersScroll.Width;
+                        var scrollTo = tab.TabViewHeaderItem.X - (_headersScroll.Width - tab.TabViewHeaderItem.Width) / 2.0;
+                        if (scrollTo < 0) scrollTo = 0;
+                        else if (scrollTo > max) scrollTo = max;
 
-                    _headersScroll.ScrollToAsync(scrollTo, 0, true);
+                        _headersScroll.ScrollToAsync(scrollTo, 0, true);
+                    }
                 }
+                else tab.IsSelected = false;
             }
             else if (e.PropertyName == TabViewItem.IsEnabledProperty.PropertyName)
             {
@@ -315,15 +372,30 @@ namespace Xamarin.Controls.TabView
 
             if (index == tabs.Count - 1)
             {
-                var tabToSelect = tabs.ElementAt(index - 1);
+                var tabToSelect = tabs.ElementAtOrDefault(index - 1);
                 SelectedTabIndex = Tabs.IndexOf(tabToSelect);
             }
             else if (index >= 0)
             {
-                var tabToSelect = tabs.ElementAt(index + 1);
+                var tabToSelect = tabs.ElementAtOrDefault(index + 1);
                 SelectedTabIndex = Tabs.IndexOf(tabToSelect);
             }
         }
+
+        #region HeaderItemsLayout
+        public Layout<View> HeaderItemsLayout
+        {
+            get { return (Layout<View>)GetValue(HeaderItemsLayoutProperty); }
+            set { SetValue(HeaderItemsLayoutProperty, value); }
+        }
+
+        public static readonly BindableProperty HeaderItemsLayoutProperty =
+            BindableProperty.Create(
+                nameof(HeaderItemsLayout),
+                typeof(Layout<View>),
+                typeof(TabView)
+                );
+        #endregion
 
         #region ScrollToSelectedTab
         public bool ScrollToSelectedTab
