@@ -11,20 +11,19 @@
     <PackageProjectUrl>https://github.com/Alex-Dobrynin/Xamarin.Controls.TabView</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Alex-Dobrynin/Xamarin.Controls.TabView.git</RepositoryUrl>
     <PackageTags>TabView Xamarin Xamarin.Forms TabbedView Tab Tabbed View Tabs Forms Control Xamarin.Forms.TabView</PackageTags>
-    <PackageReleaseNotes>Increased version to 1.0.3
+    <PackageReleaseNotes>Increased version to 1.0.4
 
-added header bar alignment,
-added possibility to change header items layout,
-small fixes</PackageReleaseNotes>
+added support for different header items layout - if not specified it will be StackLayout,
+fixes related to items selection</PackageReleaseNotes>
     <RepositoryType>Git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.3.0</AssemblyVersion>
-    <FileVersion>1.0.3.0</FileVersion>
-    <Version>1.0.3</Version>
+    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+    <FileVersion>1.0.4.0</FileVersion>
+    <Version>1.0.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="4.4.0.991640" />
+    <PackageReference Include="Xamarin.Forms" Version="4.1.0.778454" />
   </ItemGroup>
 
   <ItemGroup>
