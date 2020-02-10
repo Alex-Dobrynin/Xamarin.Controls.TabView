@@ -40,7 +40,6 @@ namespace Xamarin.Controls.TabView
             base.OnApplyTemplate();
 
             _contentContainer = this.GetTemplateChild("PART_ContentContainer") as Grid;
-            //_headersContainer = this.GetTemplateChild("PART_HeadersContainer") as Layout<View>;
             _headersScroll = this.GetTemplateChild("PART_HeadersScrollView") as ScrollView;
 
             InitHeaderBarLayout();
@@ -356,7 +355,7 @@ namespace Xamarin.Controls.TabView
             else if (e.PropertyName == TabViewItem.IsEnabledProperty.PropertyName)
             {
                 if (!tab.IsEnabled && tab.IsSelected) SelectClosestTab(tab, Tabs.Where(t => t.IsEnabled || t == tab).ToList());
-                else if (tab.IsEnabled && !Tabs.Any(t => t.IsEnabled))
+                else if (tab.IsEnabled && !Tabs.Any(t => t.IsSelected))
                 {
                     var index = Tabs.IndexOf(tab);
                     SelectedTabIndex = index;
@@ -366,19 +365,24 @@ namespace Xamarin.Controls.TabView
 
         private void SelectClosestTab(TabViewItem tab, List<TabViewItem> tabs)
         {
-            if (tabs.Count == 1) return;
-
-            var index = tabs.IndexOf(tab);
-
-            if (index == tabs.Count - 1)
+            if (tabs.Count == 1)
             {
-                var tabToSelect = tabs.ElementAtOrDefault(index - 1);
-                SelectedTabIndex = Tabs.IndexOf(tabToSelect);
+                SelectedTabIndex = -1;
             }
-            else if (index >= 0)
+            else
             {
-                var tabToSelect = tabs.ElementAtOrDefault(index + 1);
-                SelectedTabIndex = Tabs.IndexOf(tabToSelect);
+                var index = tabs.IndexOf(tab);
+
+                if (index == tabs.Count - 1)
+                {
+                    var tabToSelect = tabs.ElementAtOrDefault(index - 1);
+                    SelectedTabIndex = Tabs.IndexOf(tabToSelect);
+                }
+                else if (index >= 0)
+                {
+                    var tabToSelect = tabs.ElementAtOrDefault(index + 1);
+                    SelectedTabIndex = Tabs.IndexOf(tabToSelect);
+                }
             }
         }
 

@@ -57,11 +57,6 @@
                             </ScrollView.Triggers>
                             <control:ItemsPresenter HorizontalOptions="Fill"
                                                     VerticalOptions="Fill" />
-                            <!--<StackLayout HorizontalOptions="Fill"
-                                         VerticalOptions="Fill"
-                                         Orientation="Horizontal"
-                                         x:Name="PART_HeadersContainer"
-                                         Spacing="0" />-->
                         </ScrollView>
 
                         <Grid Grid.Row="1"
