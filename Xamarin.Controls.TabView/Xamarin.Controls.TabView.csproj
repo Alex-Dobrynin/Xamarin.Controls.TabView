@@ -11,14 +11,15 @@
     <PackageProjectUrl>https://github.com/Alex-Dobrynin/Xamarin.Controls.TabView</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Alex-Dobrynin/Xamarin.Controls.TabView.git</RepositoryUrl>
     <PackageTags>TabView Xamarin Xamarin.Forms TabbedView Tab Tabbed View Tabs Forms Control Xamarin.Forms.TabView</PackageTags>
-    <PackageReleaseNotes>Increased version to 1.0.4.1
+    <PackageReleaseNotes>Increased version to 1.0.4.2
 
-hotfix related to initial tab selection</PackageReleaseNotes>
+fixed issue when tab`s bindingcontext was reset by tabview control in case when user set it manually,
+added possibility to disable tabs instead of hide</PackageReleaseNotes>
     <RepositoryType>Git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.4.1</AssemblyVersion>
-    <FileVersion>1.0.4.1</FileVersion>
-    <Version>1.0.4.1</Version>
+    <AssemblyVersion>1.0.4.2</AssemblyVersion>
+    <FileVersion>1.0.4.2</FileVersion>
+    <Version>1.0.4.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

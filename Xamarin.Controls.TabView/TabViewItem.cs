@@ -38,10 +38,40 @@ namespace Xamarin.Controls.TabView
             }
             else if (propertyName == IsEnabledProperty.PropertyName)
             {
-                TabViewHeaderItem.IsVisible = this.IsEnabled;
+                if(HideWhenDisabled && !this.IsEnabled) TabViewHeaderItem.IsVisible = false;
+                else
+                {
+                    TabViewHeaderItem.IsVisible = true;
+                    TabViewHeaderItem.IsEnabled = this.IsEnabled;
+                }
                 if (!this.IsEnabled && this.IsSelected) this.IsSelected = false;
             }
+            else if (propertyName == HideWhenDisabledProperty.PropertyName)
+            {
+                if (HideWhenDisabled && !this.IsEnabled) TabViewHeaderItem.IsVisible = false;
+                else
+                {
+                    TabViewHeaderItem.IsVisible = true;
+                    TabViewHeaderItem.IsEnabled = this.IsEnabled;
+                }
+            }
         }
+
+        #region HideWhenDisabled
+        internal bool HideWhenDisabled
+        {
+            get { return (bool)GetValue(HideWhenDisabledProperty); }
+            set { SetValue(HideWhenDisabledProperty, value); }
+        }
+
+        internal static readonly BindableProperty HideWhenDisabledProperty =
+            BindableProperty.Create(
+                nameof(HideWhenDisabled),
+                typeof(bool),
+                typeof(TabViewItem),
+                true
+                );
+        #endregion
 
         #region IsSelected
         public bool IsSelected

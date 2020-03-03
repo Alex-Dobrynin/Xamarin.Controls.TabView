@@ -137,9 +137,16 @@ namespace Xamarin.Controls.TabView
                     InitContentTemplate(tab.BindingContext, tab);
                 }
             }
-            else if(propertyName == HeaderItemsLayoutProperty.PropertyName)
+            else if (propertyName == HeaderItemsLayoutProperty.PropertyName)
             {
                 InitHeaderBarLayout();
+            }
+            else if (propertyName == HideTabsWhenDisabledProperty.PropertyName)
+            {
+                foreach (var tab in Tabs)
+                {
+                    tab.HideWhenDisabled = HideTabsWhenDisabled;
+                }
             }
         }
 
@@ -168,7 +175,7 @@ namespace Xamarin.Controls.TabView
                 if (ContentTemplate is DataTemplateSelector selector) template = selector.SelectTemplate(item, this);
 
                 var tabContent = template.CreateContent() as View;
-                tabContent.BindingContext = item;
+                if (tabContent.BindingContext == null) tabContent.BindingContext = item;
 
                 tabItem.Content = tabContent;
             }
@@ -255,6 +262,7 @@ namespace Xamarin.Controls.TabView
                         foreach (var item in e.NewItems)
                         {
                             var tabItem = item as TabViewItem;
+                            tabItem.HideWhenDisabled = this.HideTabsWhenDisabled;
                             tabItem.PropertyChanged += TabItem_PropertyChanged;
 
                             if (!(tabItem.Header is View))
@@ -385,6 +393,22 @@ namespace Xamarin.Controls.TabView
                 }
             }
         }
+
+        #region HideTabsWhenDisabled
+        public bool HideTabsWhenDisabled
+        {
+            get { return (bool)GetValue(HideTabsWhenDisabledProperty); }
+            set { SetValue(HideTabsWhenDisabledProperty, value); }
+        }
+
+        public static readonly BindableProperty HideTabsWhenDisabledProperty =
+            BindableProperty.Create(
+                nameof(HideTabsWhenDisabled),
+                typeof(bool),
+                typeof(TabView),
+                true
+                );
+        #endregion
 
         #region HeaderItemsLayout
         public Layout<View> HeaderItemsLayout
@@ -681,5 +705,7 @@ namespace Xamarin.Controls.TabView
                 Alignment.Top
                 );
         #endregion
+
+
     }
 }
