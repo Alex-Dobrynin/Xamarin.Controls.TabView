@@ -1,3 +1,6 @@
+# MAUI version here https://github.com/MPowerKit/TabView
+
+
 # Xamarin.Controls.TabView
 Fully customizable Xamarin.Forms TabView
 
